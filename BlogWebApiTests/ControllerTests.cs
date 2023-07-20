@@ -1,6 +1,7 @@
 using BlogWebApi.Controllers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -13,10 +14,12 @@ namespace BlogWebApiTests
         {
             // Arrange
             var controller = new BlogController();
+
             var validHtml = "<html><head><title>Test</title></head><body>Test body</body></html>";
+            var contentJson = JsonConvert.SerializeObject(new { content = validHtml });
 
             var httpContext = new DefaultHttpContext();
-            httpContext.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(validHtml));
+            httpContext.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(contentJson));
             controller.ControllerContext.HttpContext = httpContext;
 
             // Act
@@ -26,6 +29,7 @@ namespace BlogWebApiTests
             var statusCodeResult = Assert.IsType<StatusCodeResult>(result);
             Assert.Equal(200, statusCodeResult.StatusCode);
         }
+
 
         [Fact]
         public async Task PostHtmlContentToDb_WhenInvalidHtmlPassed_ReturnsStatusCode400()
