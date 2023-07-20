@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Text;
 using System.Xml;
 
 namespace BlogWebApi.Controllers
@@ -8,20 +9,24 @@ namespace BlogWebApi.Controllers
     public class BlogController : ControllerBase
     {
        [HttpPost("PostHtmlContentToSql")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public IActionResult PostHtmlContentToDb(string htmlContent)
-       {
-            try
+       [ProducesResponseType(StatusCodes.Status200OK)]
+       [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> PostHtmlContentToDb()
+        {
+            using (StreamReader reader = new StreamReader(Request.Body, Encoding.UTF8))
             {
-                XmlDocument xmlDoc = new XmlDocument();
-                xmlDoc.LoadXml(htmlContent);
-                return StatusCode(200, "Valid Html");
+                string htmlContent = await reader.ReadToEndAsync();
+                try
+                {
+                    XmlDocument xmlDoc = new XmlDocument();
+                    xmlDoc.LoadXml(htmlContent);
+                    return StatusCode(200);
+                }
+                catch (XmlException)
+                {
+                    return StatusCode(400, "Invalid HTML");
+                }
             }
-            catch (XmlException)
-            {
-                return StatusCode(400, "Invalid Html");
-            }
-       }
+        }
     }
 }
