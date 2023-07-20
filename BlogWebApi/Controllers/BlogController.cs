@@ -6,6 +6,11 @@ namespace BlogWebApi.Controllers
     [ApiController]
     public class BlogController : ControllerBase
     {
-       
+       [HttpPost("PostHtmlContentToSql")]
+       public IActionResult PostHtmlContentToDb(string htmlContent)
+       {
+
+            return StatusCode(200);
+       }
     }
 }
