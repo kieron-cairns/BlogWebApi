@@ -17,8 +17,23 @@ namespace BlogWebApiTests
             var result = controller.PostHtmlContentToDb(validHtml);
 
             //Assert
-            var statusCodeResult = Assert.IsType<StatusCodeResult>(result);
+            var statusCodeResult = Assert.IsType<ObjectResult>(result);
             Assert.Equal(200, statusCodeResult.StatusCode);
         }
-    }
+
+        [Fact]
+        public void PostHtmlContentToDb_WhenInvalidHtmlPassed_ReturnsStatusCode400()
+        {
+            // Arrange
+            var controller = new BlogController();
+            string invalidHtml = "<html><body><p>Test</p></body></html"; // Missing closing angle bracket
+
+            // Act
+            var result = controller.PostHtmlContentToDb(invalidHtml);
+
+            // Assert
+            var statusCodeResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(400, statusCodeResult.StatusCode);
+        }
+    }   
 }
