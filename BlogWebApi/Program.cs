@@ -30,6 +30,16 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
+        services.AddCors(options =>
+        {
+            options.AddPolicy(name: "AllowLocalHost4200",
+                builder =>
+                {
+                    builder.WithOrigins("http://localhost:4200") // Add your front-end URL here
+                           .AllowAnyHeader()
+                           .AllowAnyMethod();
+                });
+        });
         services.AddControllers();
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
@@ -50,6 +60,8 @@ public class Startup
         app.UseHttpsRedirection();
 
         app.UseRouting();
+
+        app.UseCors("AllowLocalHost4200");
 
         app.UseAuthorization();
 
