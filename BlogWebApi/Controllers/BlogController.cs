@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Xml;
 
 namespace BlogWebApi.Controllers
 {
@@ -9,8 +10,16 @@ namespace BlogWebApi.Controllers
        [HttpPost("PostHtmlContentToSql")]
        public IActionResult PostHtmlContentToDb(string htmlContent)
        {
-
-            return StatusCode(200);
+            try
+            {
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.LoadXml(htmlContent);
+                return StatusCode(200);
+            }
+            catch (XmlException)
+            {
+                return StatusCode(400, "Invalid Html");
+            }
        }
     }
 }
