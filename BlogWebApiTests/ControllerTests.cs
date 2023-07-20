@@ -1,39 +1,50 @@
 using BlogWebApi.Controllers;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace BlogWebApiTests
 {
     public class ControllerTests
     {
         [Fact]
-        public void PostHtmlContentToDb_WhenValidHtmlPassed_ReturnsStatusCode200()
+        public async Task PostHtmlContentToDb_WhenValidHtmlPassed_ReturnsStatusCode200()
         {
-            //Arrange 
+            // Arrange
             var controller = new BlogController();
-            string validHtml = "<html><head><title>Test</title></head><body>Test body</body></html>";
+            var validHtml = "<html><head><title>Test</title></head><body>Test body</body></html>";
 
-            //Act
-            var result = controller.PostHtmlContentToDb(validHtml);
+            var httpContext = new DefaultHttpContext();
+            httpContext.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(validHtml));
+            controller.ControllerContext.HttpContext = httpContext;
 
-            //Assert
-            var statusCodeResult = Assert.IsType<ObjectResult>(result);
+            // Act
+            var result = await controller.PostHtmlContentToDb();
+
+            // Assert
+            var statusCodeResult = Assert.IsType<StatusCodeResult>(result);
             Assert.Equal(200, statusCodeResult.StatusCode);
         }
 
         [Fact]
-        public void PostHtmlContentToDb_WhenInvalidHtmlPassed_ReturnsStatusCode400()
+        public async Task PostHtmlContentToDb_WhenInvalidHtmlPassed_ReturnsStatusCode400()
         {
             // Arrange
             var controller = new BlogController();
-            string invalidHtml = "<html><body><p>Test</p></body></html"; // Missing closing angle bracket
+            var invalidHtml = "<html><body><p>Test</p></body></html"; // Missing closing angle bracket
+
+            var httpContext = new DefaultHttpContext();
+            httpContext.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(invalidHtml));
+            controller.ControllerContext.HttpContext = httpContext;
 
             // Act
-            var result = controller.PostHtmlContentToDb(invalidHtml);
+            var result = await controller.PostHtmlContentToDb();
 
             // Assert
-            var statusCodeResult = Assert.IsType<ObjectResult>(result);
-            Assert.Equal(400, statusCodeResult.StatusCode);
+            var objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(400, objectResult.StatusCode);
         }
-    }   
+
+    }
 }
