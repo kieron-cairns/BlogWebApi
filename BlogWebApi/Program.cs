@@ -1,3 +1,5 @@
+using Azure.Security.KeyVault.Secrets;
+using Azure.Identity;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -43,6 +45,18 @@ public class Startup
         services.AddControllers();
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
+
+        // Retrieve the SQL connection string from Azure Key Vault
+        var keyVaultUrl = new Uri(Configuration.GetSection("keyVaultConfig:KVUrl").Value!);
+        var keyVaultTenantId = Configuration.GetSection("keyVaultConfig:TenantId").Value;
+        var keyVaultClientId = Configuration.GetSection("keyVaultConfig:ClientId").Value;
+        var keyVaultSecret = Configuration.GetSection("keyVaultConfig:ClientSecretId").Value;
+
+        var azureCredential = new ClientSecretCredential(keyVaultTenantId, keyVaultClientId, keyVaultSecret);
+
+        var client = new SecretClient(keyVaultUrl, azureCredential);
+
+        var connectionString = client.GetSecret(Configuration.GetSection("ConnectionStrings:Blog-DB").Value).Value.Value;
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
